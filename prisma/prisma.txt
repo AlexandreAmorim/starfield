@@ -1,0 +1,1427 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model actions {
+  id                         String                       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                       String
+  type                       String                       @db.VarChar(255)
+  active                     Boolean?
+  created_at                 DateTime?                    @db.Timestamptz(6)
+  updated_at                 DateTime?                    @db.Timestamptz(6)
+  construction_in_progresses construction_in_progresses[]
+  participations             participations[]
+  quizzes                    quizzes[]
+  researcher_supervisions    researcher_supervisions[]
+  water_qualities            water_qualities[]
+}
+
+model addresses {
+  id                         Int                          @id @default(autoincrement())
+  name                       String?                      @db.VarChar(255)
+  zip                        String?                      @db.VarChar(30)
+  street                     String?                      @db.VarChar(255)
+  number                     String?                      @db.VarChar(10)
+  complement                 String?                      @db.VarChar(255)
+  neighborhood               String?                      @db.VarChar(255)
+  city                       String?                      @db.VarChar(255)
+  state                      String?                      @db.VarChar(255)
+  country                    String?                      @db.VarChar(255)
+  reference                  String?                      @db.VarChar(255)
+  latitude                   Decimal?                     @db.Decimal(9, 6)
+  longitude                  Decimal?                     @db.Decimal(9, 6)
+  created_at                 DateTime?                    @db.Timestamptz(6)
+  updated_at                 DateTime?                    @db.Timestamptz(6)
+  closing_forms              closing_forms[]
+  construction_in_progresses construction_in_progresses[]
+  managements                managements[]
+  orders                     orders[]
+  participations             participations[]
+  quizzes                    quizzes[]
+  researcher_supervisions    researcher_supervisions[]
+  upajs                      upajs[]
+  water_qualities            water_qualities[]
+}
+
+model adonis_schema {
+  id             Int       @id @default(autoincrement())
+  name           String?   @db.VarChar(255)
+  batch          Int?
+  migration_time DateTime? @default(now()) @db.Timestamptz(6)
+}
+
+model allocations {
+  id                               Int          @id @default(autoincrement())
+  user_id                          String?      @db.Uuid
+  management_id                    Int?
+  started_at                       DateTime     @db.Timestamptz(6)
+  ended_at                         DateTime?    @db.Timestamptz(6)
+  auth_id                          String?      @db.Uuid
+  created_at                       DateTime?    @db.Timestamptz(6)
+  updated_at                       DateTime?    @db.Timestamptz(6)
+  users_allocations_auth_idTousers users?       @relation("allocations_auth_idTousers", fields: [auth_id], references: [id], onUpdate: NoAction, map: "allocations_auth_id_foreign")
+  managements                      managements? @relation(fields: [management_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "allocations_management_id_foreign")
+  users_allocations_user_idTousers users?       @relation("allocations_user_idTousers", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "allocations_user_id_foreign")
+}
+
+model assessments {
+  id           String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  proximity_id String      @unique(map: "assessments_proximity_id_unique") @db.Uuid
+  sla          Int?
+  qos          Int?
+  si           String?     @db.VarChar(255)
+  mc           String?     @db.VarChar(255)
+  comment      String?
+  active       Int?
+  created_at   DateTime?   @db.Timestamptz(6)
+  updated_at   DateTime?   @db.Timestamptz(6)
+  proximities  proximities @relation(fields: [proximity_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "assessments_proximity_id_foreign")
+}
+
+model assistances {
+  id          Int           @id @default(autoincrement())
+  code        String        @unique(map: "assistances_code_unique") @db.VarChar(255)
+  description String        @unique(map: "assistances_description_unique") @db.VarChar(255)
+  created_at  DateTime?     @db.Timestamptz(6)
+  updated_at  DateTime?     @db.Timestamptz(6)
+  proximities proximities[]
+}
+
+model audits {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id    String?   @db.Uuid
+  uri        String?   @db.VarChar(255)
+  method     String?   @db.VarChar(10)
+  request    Json?     @db.Json
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+}
+
+model bdtds {
+  id                         String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  management_id              Int
+  fleet_id                   String      @db.Uuid
+  user_id                    String      @db.Uuid
+  adm_id                     String?     @db.Uuid
+  started_at                 DateTime?   @db.Timestamptz(6)
+  started_km                 String?     @db.VarChar(255)
+  ended_at                   DateTime?   @db.Timestamptz(6)
+  ended_km                   String?     @db.VarChar(255)
+  latitude_match             Decimal?    @db.Decimal(9, 6)
+  longitude_match            Decimal?    @db.Decimal(9, 6)
+  latitude_retreat           Decimal?    @db.Decimal(9, 6)
+  longitude_retreat          Decimal?    @db.Decimal(9, 6)
+  note                       String?
+  active                     Boolean?
+  created_at                 DateTime?   @db.Timestamptz(6)
+  updated_at                 DateTime?   @db.Timestamptz(6)
+  service_id                 String?     @db.Uuid
+  sector_id                  Int?
+  users_bdtds_adm_idTousers  users?      @relation("bdtds_adm_idTousers", fields: [adm_id], references: [id], onUpdate: NoAction, map: "bdtds_adm_id_foreign")
+  fleets                     fleets      @relation(fields: [fleet_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "bdtds_fleet_id_foreign")
+  managements                managements @relation(fields: [management_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "bdtds_management_id_foreign")
+  sectors                    sectors?    @relation(fields: [sector_id], references: [id], onUpdate: NoAction, map: "bdtds_sector_id_foreign")
+  services                   services?   @relation(fields: [service_id], references: [id], onUpdate: NoAction, map: "bdtds_service_id_foreign")
+  users_bdtds_user_idTousers users       @relation("bdtds_user_idTousers", fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "bdtds_user_id_foreign")
+  fuelings                   fuelings[]
+}
+
+model benefits {
+  id          Int       @id @default(autoincrement())
+  description String?   @db.VarChar(255)
+  active      Int?
+  created_at  DateTime? @db.Timestamptz(6)
+  updated_at  DateTime? @db.Timestamptz(6)
+}
+
+model blockings {
+  id                             Int       @id @default(autoincrement())
+  user_id                        String?   @db.Uuid
+  reason                         String?
+  auth_id                        String?   @db.Uuid
+  active                         Boolean?
+  created_at                     DateTime? @db.Timestamptz(6)
+  updated_at                     DateTime? @db.Timestamptz(6)
+  users_blockings_auth_idTousers users?    @relation("blockings_auth_idTousers", fields: [auth_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "blockings_auth_id_foreign")
+  users_blockings_user_idTousers users?    @relation("blockings_user_idTousers", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "blockings_user_id_foreign")
+}
+
+model body_cans {
+  id            String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  management_id Int
+  user_id       String?     @db.Uuid
+  status        Boolean?
+  observacoes   String?
+  created_at    DateTime?   @db.Timestamptz(6)
+  updated_at    DateTime?   @db.Timestamptz(6)
+  managements   managements @relation(fields: [management_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "body_cans_management_id_foreign")
+  users         users?      @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "body_cans_user_id_foreign")
+}
+
+model bodycans {
+  id         Int       @id @default(autoincrement())
+  rg         String?   @db.VarChar(255)
+  document   String?   @db.VarChar(255)
+  password   String?   @db.VarChar(255)
+  created_at DateTime? @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+}
+
+model bopms {
+  id                      String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id                 String               @db.Uuid
+  occurrence_addresses_id Int
+  management_id           Int
+  bopm_number             Int?
+  service_team            String               @db.VarChar(255)
+  body_cam                String               @db.VarChar(10)
+  origin_of_occurrence    String?              @db.VarChar(255)
+  type_of_registration    String?              @db.VarChar(255)
+  registration_number     String?              @db.VarChar(255)
+  type_of_warrant         String?              @db.VarChar(255)
+  upaj_id                 Int?
+  started_at              DateTime?            @db.Timestamptz(6)
+  arrival_dp              DateTime?            @db.Timestamptz(6)
+  atendence_dp            DateTime?            @db.Timestamptz(6)
+  exit_dp                 DateTime?            @db.Timestamptz(6)
+  history                 String?
+  is_finished             Boolean?
+  created_at              DateTime?            @db.Timestamptz(6)
+  updated_at              DateTime?            @db.Timestamptz(6)
+  school_environment      String?              @db.VarChar(255)
+  managements             managements          @relation(fields: [management_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "bopms_management_id_foreign")
+  occurrence_addresses    occurrence_addresses @relation(fields: [occurrence_addresses_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "bopms_occurrence_addresses_id_foreign")
+  upajs                   upajs?               @relation(fields: [upaj_id], references: [id], onUpdate: NoAction, map: "bopms_upaj_id_foreign")
+  users                   users                @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "bopms_user_id_foreign")
+  civil_polices           civil_polices[]
+  involved_cars           involved_cars[]
+  involveds               involveds[]
+  seizures                seizures[]
+}
+
+model civil_polices {
+  id         String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  bopm_id    String     @db.Uuid
+  name       String     @db.VarChar(255)
+  document   String     @db.VarChar(50)
+  upaj_id    Int
+  office_dp  String     @db.VarChar(255)
+  created_at DateTime?  @db.Timestamptz(6)
+  updated_at DateTime?  @db.Timestamptz(6)
+  bopms      bopms      @relation(fields: [bopm_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "civil_polices_bopm_id_foreign")
+  upajs      upajs      @relation(fields: [upaj_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "civil_polices_upaj_id_foreign")
+  seizures   seizures[]
+}
+
+model classrooms {
+  id              String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title           String            @db.VarChar(255)
+  slug            String            @db.VarChar(255)
+  active          Boolean?          @default(true)
+  created_at      DateTime?         @db.Timestamptz(6)
+  updated_at      DateTime?         @db.Timestamptz(6)
+  description     String?
+  user_classrooms user_classrooms[]
+}
+
+model closing_forms {
+  id               String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id          String?         @db.Uuid
+  order_id         String?         @db.Uuid
+  management_id    Int?
+  sector_id        Int?
+  upaj_id          Int?
+  address_id       Int?
+  register_type_id Int?
+  end_situation_id Int?
+  register_number  String?         @db.VarChar(50)
+  description      String?
+  started_at       DateTime?       @db.Timestamptz(6)
+  ended_at         DateTime?       @db.Timestamptz(6)
+  status           String?         @db.VarChar(50)
+  created_at       DateTime?       @db.Timestamptz(6)
+  updated_at       DateTime?       @db.Timestamptz(6)
+  motive_id        Int?
+  addresses        addresses?      @relation(fields: [address_id], references: [id], onUpdate: NoAction, map: "closing_forms_address_id_foreign")
+  end_situations   end_situations? @relation(fields: [end_situation_id], references: [id], onUpdate: NoAction, map: "closing_forms_end_situation_id_foreign")
+  managements      managements?    @relation(fields: [management_id], references: [id], onUpdate: NoAction, map: "closing_forms_management_id_foreign")
+  motives          motives?        @relation(fields: [motive_id], references: [id], onUpdate: NoAction, map: "closing_forms_motive_id_foreign")
+  orders           orders?         @relation(fields: [order_id], references: [id], onUpdate: NoAction, map: "closing_forms_order_id_foreign")
+  register_types   register_types? @relation(fields: [register_type_id], references: [id], onUpdate: NoAction, map: "closing_forms_register_type_id_foreign")
+  sectors          sectors?        @relation(fields: [sector_id], references: [id], onUpdate: NoAction, map: "closing_forms_sector_id_foreign")
+  upajs            upajs?          @relation(fields: [upaj_id], references: [id], onUpdate: NoAction, map: "closing_forms_upaj_id_foreign")
+  users            users?          @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "closing_forms_user_id_foreign")
+}
+
+model complements {
+  id                Int       @id @default(autoincrement())
+  benefitsIds       String?   @db.VarChar(255)
+  created_at        DateTime? @db.Timestamptz(6)
+  updated_at        DateTime? @db.Timestamptz(6)
+  documentationsIds String?   @db.VarChar(255)
+  stayStreetIds     String?   @db.VarChar(255)
+  streetTimeId      String?   @db.VarChar(255)
+  streetMotiveIds   String?   @db.VarChar(255)
+  welcomed          Boolean?
+  requested         Boolean?
+  received          Boolean?
+  followUpCreas     Boolean?
+  followUpPop       Boolean?
+  forwardingIds     String?   @db.VarChar(255)
+  note              String?
+}
+
+model construction_in_progresses {
+  id                             String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id                        String      @db.Uuid
+  management_id                  Int
+  action_id                      String      @db.Uuid
+  address_id                     Int?
+  city                           String      @db.VarChar(255)
+  name                           String      @db.VarChar(255)
+  people_working                 String      @db.VarChar(255)
+  machine_equipment              String      @db.VarChar(255)
+  kind_machine_equipament        String?     @db.VarChar(255)
+  kind_machine_equipament_others String?     @db.VarChar(255)
+  status_observation             String      @db.VarChar(255)
+  status_observation_others      String?     @db.VarChar(255)
+  note                           String?
+  latitude                       String?     @db.VarChar(255)
+  longitude                      String?     @db.VarChar(255)
+  created_at                     DateTime?   @db.Timestamptz(6)
+  updated_at                     DateTime?   @db.Timestamptz(6)
+  actions                        actions     @relation(fields: [action_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "construction_in_progresses_action_id_foreign")
+  addresses                      addresses?  @relation(fields: [address_id], references: [id], onUpdate: NoAction, map: "construction_in_progresses_address_id_foreign")
+  managements                    managements @relation(fields: [management_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "construction_in_progresses_management_id_foreign")
+  users                          users       @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "construction_in_progresses_user_id_foreign")
+}
+
+model contact_types {
+  id         Int       @id @default(autoincrement())
+  name       String    @unique(map: "contact_types_name_unique") @db.VarChar(50)
+  icon       String    @db.VarChar(255)
+  mask       String?   @db.VarChar(255)
+  created_at DateTime? @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+}
+
+model document_person {
+  id          Int        @id @default(autoincrement())
+  document_id Int?
+  person_id   String?    @db.Uuid
+  created_at  DateTime?  @db.Timestamptz(6)
+  updated_at  DateTime?  @db.Timestamptz(6)
+  documents   documents? @relation(fields: [document_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "document_person_document_id_foreign")
+  people      people?    @relation(fields: [person_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "document_person_person_id_foreign")
+
+  @@index([document_id], map: "document_person_document_id_index")
+  @@index([person_id], map: "document_person_person_id_index")
+}
+
+model documents {
+  id              Int               @id @default(autoincrement())
+  path            String?           @db.VarChar(255)
+  name            String?           @db.VarChar(255)
+  type            String?           @db.VarChar(255)
+  description     String?
+  created_at      DateTime?         @db.Timestamptz(6)
+  updated_at      DateTime?         @db.Timestamptz(6)
+  document_person document_person[]
+}
+
+model driver_licences {
+  id                                   Int       @id @default(autoincrement())
+  user_id                              String    @db.Uuid
+  auth_id                              String    @db.Uuid
+  registration                         String?   @db.VarChar(255)
+  category                             String?   @db.VarChar(255)
+  expiration_date                      DateTime? @db.Date
+  status                               Boolean?
+  created_at                           DateTime? @db.Timestamptz(6)
+  updated_at                           DateTime? @db.Timestamptz(6)
+  users_driver_licences_auth_idTousers users     @relation("driver_licences_auth_idTousers", fields: [auth_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "driver_licences_auth_id_foreign")
+  users_driver_licences_user_idTousers users     @relation("driver_licences_user_idTousers", fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "driver_licences_user_id_foreign")
+}
+
+model end_situations {
+  id            Int             @id @default(autoincrement())
+  name          String          @unique(map: "end_situations_name_unique") @db.VarChar(255)
+  created_at    DateTime?       @db.Timestamptz(6)
+  updated_at    DateTime?       @db.Timestamptz(6)
+  type          String?         @default("vehicle") @db.VarChar(30)
+  closing_forms closing_forms[]
+}
+
+/// This model has been renamed to 'Renamedextends' during introspection, because the original name 'extends' is reserved.
+model Renamedextends {
+  id                 String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name               String?   @db.VarChar(255)
+  nickname           String?   @db.VarChar(255)
+  birthday           DateTime? @db.Date
+  year_birth         Int?
+  gender             String?   @db.VarChar(30)
+  mather             String?   @db.VarChar(255)
+  father             String?   @db.VarChar(255)
+  phone              String?   @db.VarChar(255)
+  cell_phone         String?   @db.VarChar(255)
+  document           String?   @unique(map: "extends_document_unique") @db.VarChar(50)
+  document_secondary String?   @unique(map: "extends_document_secondary_unique") @db.VarChar(50)
+  place_birth        String?   @db.VarChar(255)
+  description        String?
+  user_id            String?   @db.Uuid
+  created_at         DateTime? @db.Timestamptz(6)
+  updated_at         DateTime? @db.Timestamptz(6)
+  users              users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "extends_user_id_foreign")
+  orders             orders[]
+
+  @@index([document], map: "extends_document_index")
+  @@map("extends")
+}
+
+model files {
+  id           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name         String?   @db.VarChar(255)
+  key          String?   @db.VarChar(255)
+  url          String?   @db.VarChar(255)
+  content_type String?   @db.VarChar(255)
+  ceperj       String?   @db.VarChar(255)
+  created_at   DateTime? @db.Timestamptz(6)
+  updated_at   DateTime? @db.Timestamptz(6)
+}
+
+model fleets {
+  id             String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  management_id  Int
+  user_id        String      @db.Uuid
+  order_number   String?     @db.VarChar(255)
+  plate          String?     @unique(map: "fleets_plate_unique") @db.VarChar(20)
+  special_plate  String?     @unique(map: "fleets_special_plate_unique") @db.VarChar(20)
+  color          String?     @db.VarChar(255)
+  make_car_id    Int
+  model_car_id   Int
+  type_vehicle   String?     @db.VarChar(255)
+  fuel           String?     @db.VarChar(255)
+  status_vehicle Boolean?
+  note           String?
+  created_at     DateTime?   @db.Timestamptz(6)
+  updated_at     DateTime?   @db.Timestamptz(6)
+  bdtds          bdtds[]
+  make_cars      make_cars   @relation(fields: [make_car_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fleets_make_car_id_foreign")
+  managements    managements @relation(fields: [management_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fleets_management_id_foreign")
+  model_cars     model_cars  @relation(fields: [model_car_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fleets_model_car_id_foreign")
+  users          users       @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fleets_user_id_foreign")
+  fuelings       fuelings[]
+
+  @@index([plate], map: "fleets_plate_index")
+  @@index([special_plate], map: "fleets_special_plate_index")
+}
+
+model fuelings {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  fleet_id   String    @db.Uuid
+  user_id    String    @db.Uuid
+  bdtd_id    String    @db.Uuid
+  gases_id   Int
+  fuel       String?   @db.VarChar(255)
+  liters     Float?    @db.Real
+  km_fueling String?   @db.VarChar(255)
+  created_at DateTime? @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  bdtds      bdtds     @relation(fields: [bdtd_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fuelings_bdtd_id_foreign")
+  fleets     fleets    @relation(fields: [fleet_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fuelings_fleet_id_foreign")
+  gases      gases     @relation(fields: [gases_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fuelings_gases_id_foreign")
+  users      users     @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fuelings_user_id_foreign")
+}
+
+model gases {
+  id         Int        @id @default(autoincrement())
+  user_id    String     @db.Uuid
+  fantasy    String?    @db.VarChar(255)
+  corporate  String?    @db.VarChar(255)
+  cnpj       String?    @db.VarChar(255)
+  telephone  String?    @db.VarChar(255)
+  activity   String?    @db.VarChar(255)
+  address    String?    @db.VarChar(255)
+  district   String?    @db.VarChar(255)
+  city       String?    @db.VarChar(255)
+  state      String?    @db.VarChar(255)
+  cep        String?    @db.VarChar(255)
+  status     Boolean?
+  latitude   Decimal?   @db.Decimal(9, 6)
+  longitude  Decimal?   @db.Decimal(9, 6)
+  created_at DateTime?  @db.Timestamptz(6)
+  updated_at DateTime?  @db.Timestamptz(6)
+  fuelings   fuelings[]
+  users      users      @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "gases_user_id_foreign")
+}
+
+model images {
+  id          Int       @id @default(autoincrement())
+  name        String?   @db.VarChar(255)
+  path        String?   @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  created_at  DateTime? @db.Timestamptz(6)
+  updated_at  DateTime? @db.Timestamptz(6)
+}
+
+model involved_cars {
+  id           String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  bopm_id      String     @db.Uuid
+  user_id      String     @db.Uuid
+  involved_id  String?    @db.Uuid
+  motivation   String?    @db.VarChar(255)
+  plate        String?    @db.VarChar(255)
+  chassi       String?    @db.VarChar(255)
+  color        String?    @db.VarChar(255)
+  brand        String?    @db.VarChar(255)
+  model        String?    @db.VarChar(255)
+  conductor    String?    @db.VarChar(255)
+  exercise     String?    @db.VarChar(255)
+  crlv         String?    @db.VarChar(255)
+  cnh          String?    @db.VarChar(255)
+  category     String?    @db.VarChar(255)
+  uf           String?    @db.VarChar(255)
+  infringement String?    @db.VarChar(255)
+  created_at   DateTime?  @db.Timestamptz(6)
+  updated_at   DateTime?  @db.Timestamptz(6)
+  bopms        bopms      @relation(fields: [bopm_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "involved_cars_bopm_id_foreign")
+  involveds    involveds? @relation(fields: [involved_id], references: [id], onUpdate: NoAction, map: "involved_cars_involved_id_foreign")
+  users        users      @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "involved_cars_user_id_foreign")
+}
+
+model involveds {
+  id                      String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id                 String             @db.Uuid
+  occurrence_addresses_id Int
+  people_occurrence_id    String             @db.Uuid
+  bopm_id                 String             @db.Uuid
+  type_involvement        String?            @db.VarChar(255)
+  handcuffs               String?            @db.VarChar(255)
+  created_at              DateTime?          @db.Timestamptz(6)
+  updated_at              DateTime?          @db.Timestamptz(6)
+  involved_cars           involved_cars[]
+  bopms                   bopms              @relation(fields: [bopm_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "involveds_bopm_id_foreign")
+  people_occurrences      people_occurrences @relation(fields: [people_occurrence_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "involveds_people_occurrence_id_foreign")
+  users                   users              @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "involveds_user_id_foreign")
+  seizures                seizures[]
+}
+
+model make_cars {
+  id         Int          @id @default(autoincrement())
+  name       String?      @db.VarChar(255)
+  created_at DateTime?    @db.Timestamptz(6)
+  updated_at DateTime?    @db.Timestamptz(6)
+  fleets     fleets[]
+  model_cars model_cars[]
+}
+
+model managements {
+  id                                                      Int                          @id @default(autoincrement())
+  level                                                   String?                      @db.VarChar(20)
+  name                                                    String                       @unique(map: "managements_name_unique") @db.VarChar(255)
+  initials                                                String                       @unique(map: "managements_initials_unique") @db.VarChar(255)
+  phone                                                   String?                      @db.VarChar(20)
+  ascendant_id                                            Int?
+  core_id                                                 Int?
+  address_id                                              Int?
+  is_core                                                 Boolean?                     @default(false)
+  user_id                                                 String?                      @db.Uuid
+  created_at                                              DateTime?                    @db.Timestamptz(6)
+  updated_at                                              DateTime?                    @db.Timestamptz(6)
+  cproeis_name                                            String?                      @unique(map: "managements_cproeis_name_unique") @db.VarChar(255)
+  status                                                  Boolean?                     @default(false)
+  allocations                                             allocations[]
+  bdtds                                                   bdtds[]
+  body_cans                                               body_cans[]
+  bopms                                                   bopms[]
+  closing_forms                                           closing_forms[]
+  construction_in_progresses                              construction_in_progresses[]
+  fleets                                                  fleets[]
+  addresses                                               addresses?                   @relation(fields: [address_id], references: [id], onUpdate: NoAction, map: "managements_address_id_foreign")
+  managements_managements_ascendant_idTomanagements       managements?                 @relation("managements_ascendant_idTomanagements", fields: [ascendant_id], references: [id], onUpdate: NoAction, map: "managements_ascendant_id_foreign")
+  other_managements_managements_ascendant_idTomanagements managements[]                @relation("managements_ascendant_idTomanagements")
+  managements_managements_core_idTomanagements            managements?                 @relation("managements_core_idTomanagements", fields: [core_id], references: [id], onUpdate: NoAction, map: "managements_core_id_foreign")
+  other_managements_managements_core_idTomanagements      managements[]                @relation("managements_core_idTomanagements")
+  users                                                   users?                       @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "managements_user_id_foreign")
+  orders                                                  orders[]
+  participations                                          participations[]
+  polls                                                   polls[]
+  proximities                                             proximities[]
+  quizzes                                                 quizzes[]
+  researcher_supervisions                                 researcher_supervisions[]
+  sectors                                                 sectors[]
+  services                                                services[]
+  socials                                                 socials[]
+  supports                                                supports[]
+  water_qualities                                         water_qualities[]
+}
+
+model model_cars {
+  id         Int       @id @default(autoincrement())
+  make_id    Int
+  name       String?   @db.VarChar(255)
+  created_at DateTime? @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  fleets     fleets[]
+  make_cars  make_cars @relation(fields: [make_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "model_cars_make_id_foreign")
+}
+
+model motives {
+  id            Int             @id @default(autoincrement())
+  name          String          @unique(map: "motives_name_unique") @db.VarChar(255)
+  description   String?
+  created_at    DateTime?       @db.Timestamptz(6)
+  updated_at    DateTime?       @db.Timestamptz(6)
+  closing_forms closing_forms[]
+}
+
+model mrcols_sections {
+  id                    String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id               String         @db.Uuid
+  rcols_section_id      String         @db.Uuid
+  pmerj_team            String?        @db.VarChar(255)
+  support_vehicles      String?        @db.VarChar(255)
+  opm                   String?        @db.VarChar(255)
+  low_approach          String?        @db.VarChar(255)
+  violation_notices     String?        @db.VarChar(255)
+  specify_used          String?
+  miscellaneous_changes String?
+  created_at            DateTime?      @db.Timestamptz(6)
+  updated_at            DateTime?      @db.Timestamptz(6)
+  rcols_sections        rcols_sections @relation(fields: [rcols_section_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "mrcols_sections_rcols_section_id_foreign")
+}
+
+model occurrence_addresses {
+  id           Int       @id @default(autoincrement())
+  name         String?   @db.VarChar(255)
+  zip          String?   @db.VarChar(30)
+  street       String?   @db.VarChar(255)
+  number       String?   @db.VarChar(10)
+  complement   String?   @db.VarChar(255)
+  neighborhood String?   @db.VarChar(255)
+  city         String?   @db.VarChar(255)
+  state        String?   @db.VarChar(255)
+  country      String?   @db.VarChar(255)
+  reference    String?   @db.VarChar(255)
+  latitude     Decimal?  @db.Decimal(9, 6)
+  longitude    Decimal?  @db.Decimal(9, 6)
+  created_at   DateTime? @db.Timestamptz(6)
+  updated_at   DateTime? @db.Timestamptz(6)
+  bopms        bopms[]
+}
+
+model order_system {
+  id         Int       @id @default(autoincrement())
+  order_id   String?   @db.Uuid
+  system_id  Int?
+  created_at DateTime? @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  orders     orders?   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "order_system_order_id_foreign")
+  systems    systems?  @relation(fields: [system_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "order_system_system_id_foreign")
+}
+
+model orders {
+  id                              String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  result_id                       Int?
+  management_id                   Int?
+  user_id                         String?         @db.Uuid
+  operator_id                     String?         @db.Uuid
+  vehicle_id                      String?         @db.Uuid
+  person_id                       String?         @db.Uuid
+  address_id                      Int?
+  latitude                        Decimal?        @db.Decimal(9, 6)
+  longitude                       Decimal?        @db.Decimal(9, 6)
+  note                            String?
+  description                     String?
+  document                        String?         @db.VarChar(50)
+  document_secondary              String?         @db.VarChar(50)
+  name                            String?         @db.VarChar(255)
+  birthday                        DateTime?       @db.Date
+  mather                          String?         @db.VarChar(255)
+  father                          String?         @db.VarChar(255)
+  plate                           String?         @db.VarChar(20)
+  chassi                          String?         @db.VarChar(20)
+  type                            String?         @db.VarChar(20)
+  status                          String?         @db.VarChar(20)
+  created_at                      DateTime?       @db.Timestamptz(6)
+  updated_at                      DateTime?       @db.Timestamptz(6)
+  color                           String?         @db.VarChar(100)
+  brand                           String?         @db.VarChar(100)
+  model                           String?         @db.VarChar(100)
+  engine_number                   String?         @db.VarChar(30)
+  place_birth                     String?         @db.VarChar(2)
+  gender                          String?         @db.VarChar(30)
+  service_id                      String?         @db.Uuid
+  sector_id                       Int?
+  extend_id                       String?         @db.Uuid
+  closing_forms                   closing_forms[]
+  order_system                    order_system[]
+  addresses                       addresses?      @relation(fields: [address_id], references: [id], onUpdate: NoAction, map: "orders_address_id_foreign")
+  Renamedextends                  Renamedextends? @relation(fields: [extend_id], references: [id], onUpdate: NoAction, map: "orders_extend_id_foreign")
+  managements                     managements?    @relation(fields: [management_id], references: [id], onUpdate: NoAction, map: "orders_management_id_foreign")
+  users_orders_operator_idTousers users?          @relation("orders_operator_idTousers", fields: [operator_id], references: [id], onUpdate: NoAction, map: "orders_operator_id_foreign")
+  people                          people?         @relation(fields: [person_id], references: [id], onUpdate: NoAction, map: "orders_person_id_foreign")
+  results                         results?        @relation(fields: [result_id], references: [id], onUpdate: NoAction, map: "orders_result_id_foreign")
+  sectors                         sectors?        @relation(fields: [sector_id], references: [id], onUpdate: NoAction, map: "orders_sector_id_foreign")
+  services                        services?       @relation(fields: [service_id], references: [id], onUpdate: NoAction, map: "orders_service_id_foreign")
+  users_orders_user_idTousers     users?          @relation("orders_user_idTousers", fields: [user_id], references: [id], onUpdate: NoAction, map: "orders_user_id_foreign")
+  vehicles                        vehicles?       @relation(fields: [vehicle_id], references: [id], onUpdate: NoAction, map: "orders_vehicle_id_foreign")
+}
+
+model participations {
+  id                    String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id               String      @db.Uuid
+  management_id         Int
+  action_id             String      @db.Uuid
+  address_id            Int?
+  city                  String      @db.VarChar(255)
+  name                  String      @db.VarChar(255)
+  gender                String?     @db.VarChar(30)
+  age                   String?     @db.VarChar(255)
+  lived_city            String?     @db.VarChar(255)
+  long_lived_city       String?     @db.VarChar(255)
+  documentations_ids    String?     @db.VarChar(255)
+  naturalness           String?     @db.VarChar(255)
+  education             String?     @db.VarChar(255)
+  health                String?     @db.VarChar(255)
+  culture               String?     @db.VarChar(255)
+  leisure               String?     @db.VarChar(255)
+  sanitation            String?     @db.VarChar(255)
+  piped_water           String?     @db.VarChar(255)
+  housing               String?     @db.VarChar(255)
+  public_security       String?     @db.VarChar(255)
+  public_transportation String?     @db.VarChar(255)
+  latitude              String?     @db.VarChar(255)
+  longitude             String?     @db.VarChar(255)
+  created_at            DateTime?   @db.Timestamptz(6)
+  updated_at            DateTime?   @db.Timestamptz(6)
+  residence             String?     @db.VarChar(255)
+  ethnicity             String?     @db.VarChar(255)
+  marital               String?     @db.VarChar(255)
+  schooling             String?     @db.VarChar(255)
+  currently             String?     @db.VarChar(255)
+  income                String?     @db.VarChar(255)
+  actions               actions     @relation(fields: [action_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "participations_action_id_foreign")
+  addresses             addresses?  @relation(fields: [address_id], references: [id], onUpdate: NoAction, map: "participations_address_id_foreign")
+  managements           managements @relation(fields: [management_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "participations_management_id_foreign")
+  users                 users       @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "participations_user_id_foreign")
+}
+
+model people {
+  id                 String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name               String?           @db.VarChar(255)
+  nickname           String?           @db.VarChar(255)
+  birthday           DateTime?         @db.Date
+  year_birth         Int?
+  gender             String?           @db.VarChar(30)
+  mather             String?           @db.VarChar(255)
+  father             String?           @db.VarChar(255)
+  phone              String?           @db.VarChar(255)
+  cell_phone         String?           @db.VarChar(255)
+  document           String?           @unique(map: "people_document_unique") @db.VarChar(50)
+  document_secondary String?           @unique(map: "people_document_secondary_unique") @db.VarChar(50)
+  place_birth        String?           @db.VarChar(255)
+  description        String?
+  user_id            String?           @db.Uuid
+  created_at         DateTime?         @db.Timestamptz(6)
+  updated_at         DateTime?         @db.Timestamptz(6)
+  document_person    document_person[]
+  orders             orders[]
+  users              users?            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "people_user_id_foreign")
+  situations         situations[]
+
+  @@index([document], map: "people_document_index")
+}
+
+model people_occurrences {
+  id                 String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id            String?     @db.Uuid
+  name               String?     @db.VarChar(255)
+  birthday           DateTime?   @db.Date
+  gender             String?     @db.VarChar(30)
+  mather             String?     @db.VarChar(255)
+  father             String?     @db.VarChar(255)
+  document           String?     @db.VarChar(50)
+  document_secondary String?     @db.VarChar(50)
+  marital            String?     @db.VarChar(255)
+  email              Int?
+  phone              String?     @db.VarChar(255)
+  created_at         DateTime?   @db.Timestamptz(6)
+  updated_at         DateTime?   @db.Timestamptz(6)
+  involveds          involveds[]
+  users              users?      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "people_occurrences_user_id_foreign")
+}
+
+model permission_role {
+  id            Int          @id @default(autoincrement())
+  permission_id Int?
+  role_id       Int?
+  created_at    DateTime?    @db.Timestamptz(6)
+  updated_at    DateTime?    @db.Timestamptz(6)
+  permissions   permissions? @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "permission_role_permission_id_foreign")
+  roles         roles?       @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "permission_role_role_id_foreign")
+
+  @@index([permission_id], map: "permission_role_permission_id_index")
+  @@index([role_id], map: "permission_role_role_id_index")
+}
+
+model permission_user {
+  id            Int          @id @default(autoincrement())
+  permission_id Int?
+  user_id       String?      @db.Uuid
+  created_at    DateTime?    @db.Timestamptz(6)
+  updated_at    DateTime?    @db.Timestamptz(6)
+  permissions   permissions? @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "permission_user_permission_id_foreign")
+  users         users?       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "permission_user_user_id_foreign")
+
+  @@index([permission_id], map: "permission_user_permission_id_index")
+  @@index([user_id], map: "permission_user_user_id_index")
+}
+
+model permissions {
+  id              Int               @id @default(autoincrement())
+  slug            String            @unique(map: "permissions_slug_unique") @db.VarChar(255)
+  name            String            @unique(map: "permissions_name_unique") @db.VarChar(255)
+  description     String?
+  created_at      DateTime?         @db.Timestamptz(6)
+  updated_at      DateTime?         @db.Timestamptz(6)
+  permission_role permission_role[]
+  permission_user permission_user[]
+}
+
+model polls {
+  id                  String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  management_id       Int
+  user_id             String?     @db.Uuid
+  date_poll           DateTime?   @db.Date
+  available_vacancies Int?
+  vacancies_filled    Int?
+  absences            Int?
+  created_at          DateTime?   @db.Timestamptz(6)
+  updated_at          DateTime?   @db.Timestamptz(6)
+  managements         managements @relation(fields: [management_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "polls_management_id_foreign")
+  users               users?      @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "polls_user_id_foreign")
+}
+
+model proximities {
+  id            String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  assistance_id Int
+  management_id Int
+  store         String?      @db.VarChar(255)
+  name          String?      @db.VarChar(255)
+  document      String?      @db.VarChar(50)
+  phone         String?      @db.VarChar(255)
+  email         String?      @db.VarChar(255)
+  cep           String?      @db.VarChar(8)
+  street        String?      @db.VarChar(255)
+  number        String?      @db.VarChar(255)
+  complement    String?      @db.VarChar(255)
+  description   String?
+  user_id       String?      @db.Uuid
+  created_at    DateTime?    @db.Timestamptz(6)
+  updated_at    DateTime?    @db.Timestamptz(6)
+  lat           Decimal?     @db.Decimal(9, 6)
+  lng           Decimal?     @db.Decimal(9, 6)
+  distric       String?      @db.VarChar(255)
+  service_id    String?      @db.Uuid
+  sector_id     Int?
+  assessments   assessments?
+  assistances   assistances  @relation(fields: [assistance_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "proximities_assistance_id_foreign")
+  managements   managements  @relation(fields: [management_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "proximities_management_id_foreign")
+  sectors       sectors?     @relation(fields: [sector_id], references: [id], onUpdate: NoAction, map: "proximities_sector_id_foreign")
+  services      services?    @relation(fields: [service_id], references: [id], onUpdate: NoAction, map: "proximities_service_id_foreign")
+  users         users?       @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "proximities_user_id_foreign")
+}
+
+model quizzes {
+  id                 String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id            String      @db.Uuid
+  management_id      Int
+  action_id          String      @db.Uuid
+  address_id         Int?
+  city               String      @db.VarChar(255)
+  name               String      @db.VarChar(255)
+  gender             String?     @db.VarChar(30)
+  age                String?     @db.VarChar(255)
+  lived_city         String?     @db.VarChar(255)
+  long_lived_city    String?     @db.VarChar(255)
+  implantation       String?     @db.VarChar(255)
+  knowledge          String?     @db.VarChar(255)
+  need               String?     @db.VarChar(255)
+  quality_work       String?     @db.VarChar(255)
+  improvement_region String?     @db.VarChar(255)
+  improvement_life   String?     @db.VarChar(255)
+  impact_region      String?     @db.VarChar(255)
+  impact_life        String?     @db.VarChar(255)
+  latitude           String?     @db.VarChar(255)
+  longitude          String?     @db.VarChar(255)
+  type               String?     @db.VarChar(255)
+  created_at         DateTime?   @db.Timestamptz(6)
+  updated_at         DateTime?   @db.Timestamptz(6)
+  residence          String?     @db.VarChar(255)
+  ethnicity          String?     @db.VarChar(255)
+  marital            String?     @db.VarChar(255)
+  schooling          String?     @db.VarChar(255)
+  currently          String?     @db.VarChar(255)
+  income             String?     @db.VarChar(255)
+  actions            actions     @relation(fields: [action_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "quizzes_action_id_foreign")
+  addresses          addresses?  @relation(fields: [address_id], references: [id], onUpdate: NoAction, map: "quizzes_address_id_foreign")
+  managements        managements @relation(fields: [management_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "quizzes_management_id_foreign")
+  users              users       @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "quizzes_user_id_foreign")
+}
+
+model rcols_addresses {
+  id          Int       @id @default(autoincrement())
+  cod         String?   @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  locality    String?   @db.VarChar(255)
+  created_at  DateTime? @db.Timestamptz(6)
+  updated_at  DateTime? @db.Timestamptz(6)
+}
+
+model rcols_section_twos {
+  id                       String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  rcols_section_id         String         @db.Uuid
+  addressOperation         String?        @db.VarChar(255)
+  locality                 String?        @db.VarChar(255)
+  another_not_listed       String?        @db.VarChar(255)
+  departure_meeting_point  String?        @db.VarChar(255)
+  operation_assembly       String?        @db.VarChar(255)
+  first_approach           String?        @db.VarChar(255)
+  closing                  String?        @db.VarChar(255)
+  approach                 Int?
+  reconductor              Int?
+  refusal                  Int?
+  celebrities_authorities  Int?
+  four_ml                  Int?
+  thirtythree_ml           Int?
+  thirtyfour_ml            Int?
+  passive_tests_performed  Int?
+  changes_material         String?
+  cnh_collected            Int?
+  fined                    Int?
+  towed                    Int?
+  removal_resolutions      Int?
+  arrests_means_evidence   Int?
+  art307                   Int?
+  criminal_occurrences     Int?
+  driving_canceled_license Int?
+  vehicle_resolutions      String?
+  administrative_tests     String?
+  created_at               DateTime?      @db.Timestamptz(6)
+  updated_at               DateTime?      @db.Timestamptz(6)
+  rcols_sections           rcols_sections @relation(fields: [rcols_section_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "rcols_section_twos_rcols_section_id_foreign")
+}
+
+model rcols_sections {
+  id                 String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id            String               @db.Uuid
+  management_id      Int
+  militaryChief      String?              @db.Uuid
+  team               String?              @db.VarChar(255)
+  operation_date     DateTime?            @db.Date
+  segovTeamCivil     String?              @db.VarChar(255)
+  segovTeamMilitar   String?              @db.VarChar(255)
+  change_ols         String?
+  agent_detran       Int?
+  number_trailers    Int?
+  change_support     String?
+  cars               String?              @db.VarChar(255)
+  changes_general    String?
+  created_at         DateTime?            @db.Timestamptz(6)
+  updated_at         DateTime?            @db.Timestamptz(6)
+  changes_material   String?
+  mrcols_sections    mrcols_sections[]
+  rcols_section_twos rcols_section_twos[]
+}
+
+model reducols_section_twos {
+  id                       String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  reducols_section_id      String            @db.Uuid
+  place_action             String?           @db.VarChar(255)
+  type_action              String?           @db.VarChar(255)
+  type_audience            String?           @db.VarChar(255)
+  institution_name         String?           @db.VarChar(255)
+  start_time               String?           @db.VarChar(255)
+  final_hour               String?           @db.VarChar(255)
+  approach                 Int?
+  tests                    Int?
+  used_caps                Int?
+  available_caps           Int?
+  distributed_folders      Int?
+  cricris                  Int?
+  vetarolas                Int?
+  used_adhesives           Int?
+  sequence_certificates    Int?
+  gibis                    Int?
+  distributed_certificates Int?
+  created_at               DateTime?         @db.Timestamptz(6)
+  updated_at               DateTime?         @db.Timestamptz(6)
+  reducols_sections        reducols_sections @relation(fields: [reducols_section_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "reducols_section_twos_reducols_section_id_foreign")
+}
+
+model reducols_sections {
+  id                     String                  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id                String                  @db.Uuid
+  management_id          Int
+  team                   String?                 @db.VarChar(255)
+  operation_date         DateTime?               @db.Date
+  educationPcd_id        String?                 @db.VarChar(255)
+  educationAgents_id     String?                 @db.VarChar(255)
+  changes_staff          String?
+  breathalyzers          String?                 @db.VarChar(255)
+  cars_id                String?                 @db.VarChar(255)
+  changes_general        String?
+  contact_received       String?                 @db.VarChar(255)
+  occurrence_observation String?
+  lat                    Decimal?                @db.Decimal(9, 6)
+  lng                    Decimal?                @db.Decimal(9, 6)
+  created_at             DateTime?               @db.Timestamptz(6)
+  updated_at             DateTime?               @db.Timestamptz(6)
+  reducols_section_twos  reducols_section_twos[]
+}
+
+model register_types {
+  id            Int             @id @default(autoincrement())
+  name          String          @unique(map: "register_types_name_unique") @db.VarChar(255)
+  created_at    DateTime?       @db.Timestamptz(6)
+  updated_at    DateTime?       @db.Timestamptz(6)
+  closing_forms closing_forms[]
+}
+
+model researcher_supervisions {
+  id                           String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id                      String      @db.Uuid
+  management_id                Int
+  address_id                   Int?
+  researchers_ids              String
+  city                         String      @db.VarChar(255)
+  action_id                    String      @db.Uuid
+  number_researchers           String?     @db.VarChar(255)
+  fulfilled_tasks              String?     @db.VarChar(255)
+  fulfilled_tasks_ids          String?
+  performance                  String?     @db.VarChar(255)
+  team_work                    String?     @db.VarChar(255)
+  interpersonal_relationship   String?     @db.VarChar(255)
+  record_work_report           String?     @db.VarChar(255)
+  responsibility_regularity    String?     @db.VarChar(255)
+  critical_perception_analysis String?     @db.VarChar(255)
+  organization_planning        String?     @db.VarChar(255)
+  proactivity                  String?     @db.VarChar(255)
+  motivation                   String?     @db.VarChar(255)
+  initiative                   String?     @db.VarChar(255)
+  communication_capacity       String?     @db.VarChar(255)
+  cooperation                  String?     @db.VarChar(255)
+  positively_highlighted       String?
+  highlighted_negatively       String?
+  observation                  String?
+  latitude                     String?     @db.VarChar(255)
+  longitude                    String?     @db.VarChar(255)
+  created_at                   DateTime?   @db.Timestamptz(6)
+  updated_at                   DateTime?   @db.Timestamptz(6)
+  actions                      actions     @relation(fields: [action_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "researcher_supervisions_action_id_foreign")
+  addresses                    addresses?  @relation(fields: [address_id], references: [id], onUpdate: NoAction, map: "researcher_supervisions_address_id_foreign")
+  managements                  managements @relation(fields: [management_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "researcher_supervisions_management_id_foreign")
+  users                        users       @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "researcher_supervisions_user_id_foreign")
+}
+
+model results {
+  id         Int       @id @default(autoincrement())
+  name       String    @unique(map: "results_name_unique") @db.VarChar(255)
+  conduction Boolean?
+  type       String?   @db.VarChar(20)
+  user_id    String?   @db.Uuid
+  created_at DateTime? @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  orders     orders[]
+  users      users?    @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "results_user_id_foreign")
+
+  @@index([name], map: "results_name_index")
+}
+
+model role_user {
+  id         Int       @id @default(autoincrement())
+  role_id    Int?
+  user_id    String    @db.Uuid
+  created_at DateTime? @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  roles      roles?    @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "role_user_role_id_foreign")
+  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "role_user_user_id_foreign")
+
+  @@index([role_id], map: "role_user_role_id_index")
+  @@index([user_id], map: "role_user_user_id_index")
+}
+
+model roles {
+  id              Int               @id @default(autoincrement())
+  slug            String            @unique(map: "roles_slug_unique") @db.VarChar(255)
+  name            String            @unique(map: "roles_name_unique") @db.VarChar(255)
+  description     String?
+  created_at      DateTime?         @db.Timestamptz(6)
+  updated_at      DateTime?         @db.Timestamptz(6)
+  permission_role permission_role[]
+  role_user       role_user[]
+}
+
+model sectors {
+  id            Int             @id @default(autoincrement())
+  order         Int?
+  initials      String?         @db.VarChar(20)
+  name          String?         @db.VarChar(200)
+  management_id Int?
+  description   String?
+  status        Boolean?        @default(true)
+  user_id       String?         @db.Uuid
+  created_at    DateTime?       @db.Timestamptz(6)
+  updated_at    DateTime?       @db.Timestamptz(6)
+  bdtds         bdtds[]
+  closing_forms closing_forms[]
+  orders        orders[]
+  proximities   proximities[]
+  managements   managements?    @relation(fields: [management_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "sectors_management_id_foreign")
+  services      services[]
+  socials       socials[]
+}
+
+model seizures {
+  id              String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  bopm_id         String         @db.Uuid
+  civil_police_id String?        @db.Uuid
+  involved_id     String?        @db.Uuid
+  brand           String?        @db.VarChar(255)
+  model           String?        @db.VarChar(255)
+  color           String?        @db.VarChar(255)
+  type            String?        @db.VarChar(255)
+  caliber         String?        @db.VarChar(255)
+  year            String?        @db.VarChar(255)
+  amount          String?        @db.VarChar(255)
+  weight          String?        @db.VarChar(255)
+  serial          String?        @db.VarChar(255)
+  plate           String?        @db.VarChar(255)
+  destiny         String?        @db.VarChar(255)
+  shaved          String?        @db.VarChar(255)
+  seizure_type    String         @db.VarChar(255)
+  created_at      DateTime?      @db.Timestamptz(6)
+  updated_at      DateTime?      @db.Timestamptz(6)
+  bopms           bopms          @relation(fields: [bopm_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "seizures_bopm_id_foreign")
+  civil_polices   civil_polices? @relation(fields: [civil_police_id], references: [id], onUpdate: NoAction, map: "seizures_civil_police_id_foreign")
+  involveds       involveds?     @relation(fields: [involved_id], references: [id], onUpdate: NoAction, map: "seizures_involved_id_foreign")
+}
+
+model services {
+  id                                        String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sector_id                                 Int?
+  management_id                             Int
+  user_id                                   String        @db.Uuid
+  started_at                                DateTime      @db.Timestamptz(6)
+  ended_at                                  DateTime      @db.Timestamptz(6)
+  presence_started_id                       String?       @db.Uuid
+  presence_started_at                       DateTime?     @db.Timestamptz(6)
+  presence_ended_id                         String?       @db.Uuid
+  presence_ended_at                         DateTime?     @db.Timestamptz(6)
+  missing_id                                String?       @db.Uuid
+  missing_at                                DateTime?     @db.Timestamptz(6)
+  description                               String?       @db.VarChar(255)
+  auth_id                                   String?       @db.Uuid
+  status                                    String?       @db.VarChar(30)
+  created_at                                DateTime?     @db.Timestamptz(6)
+  updated_at                                DateTime?     @db.Timestamptz(6)
+  bdtds                                     bdtds[]
+  orders                                    orders[]
+  proximities                               proximities[]
+  users_services_auth_idTousers             users?        @relation("services_auth_idTousers", fields: [auth_id], references: [id], onUpdate: NoAction, map: "services_auth_id_foreign")
+  managements                               managements   @relation(fields: [management_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "services_management_id_foreign")
+  users_services_missing_idTousers          users?        @relation("services_missing_idTousers", fields: [missing_id], references: [id], onUpdate: NoAction, map: "services_missing_id_foreign")
+  users_services_presence_ended_idTousers   users?        @relation("services_presence_ended_idTousers", fields: [presence_ended_id], references: [id], onUpdate: NoAction, map: "services_presence_ended_id_foreign")
+  users_services_presence_started_idTousers users?        @relation("services_presence_started_idTousers", fields: [presence_started_id], references: [id], onUpdate: NoAction, map: "services_presence_started_id_foreign")
+  sectors                                   sectors?      @relation(fields: [sector_id], references: [id], onUpdate: NoAction, map: "services_sector_id_foreign")
+  users_services_user_idTousers             users         @relation("services_user_idTousers", fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "services_user_id_foreign")
+  socials                                   socials[]
+}
+
+model settings {
+  id                   Int       @id @default(autoincrement())
+  version              String?
+  created_at           DateTime? @db.Timestamptz(6)
+  updated_at           DateTime? @db.Timestamptz(6)
+  profile_update_limit DateTime? @db.Timestamptz(6)
+  managementsIds       String?   @db.VarChar(255)
+  cortex_status        Boolean?  @default(true)
+  cortex_token         String?   @db.VarChar(255)
+  cortex_status_person Boolean?  @default(true)
+  cortex_token_person  String?   @db.VarChar(255)
+  cetic_status         Boolean?  @default(true)
+  cetic_token          String?
+  sinalid_status       Boolean?  @default(true)
+  sinalid_token        String?
+  sinalid_cookie       String?
+}
+
+model situation_types {
+  id         Int          @id @default(autoincrement())
+  name       String       @unique(map: "situation_types_name_unique") @db.VarChar(255)
+  created_at DateTime?    @db.Timestamptz(6)
+  updated_at DateTime?    @db.Timestamptz(6)
+  situations situations[]
+
+  @@index([name], map: "situation_types_name_index")
+}
+
+model situations {
+  id              Int             @id @default(autoincrement())
+  person_id       String?         @db.Uuid
+  situation_type  String          @db.VarChar(255)
+  started_at      DateTime        @db.Timestamptz(6)
+  ended_at        DateTime?       @db.Timestamptz(6)
+  description     String?
+  created_at      DateTime?       @db.Timestamptz(6)
+  updated_at      DateTime?       @db.Timestamptz(6)
+  people          people?         @relation(fields: [person_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "situations_person_id_foreign")
+  situation_types situation_types @relation(fields: [situation_type], references: [name], onDelete: NoAction, map: "situations_situation_type_foreign")
+
+  @@index([person_id], map: "situations_person_id_index")
+  @@index([situation_type], map: "situations_situation_type_index")
+}
+
+model socials {
+  id                String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  management_id     Int
+  sector_id         Int?
+  service_id        String?     @db.Uuid
+  user_id           String?     @db.Uuid
+  complement_id     Int?
+  name              String?     @db.VarChar(255)
+  social_name       String?     @db.VarChar(255)
+  birthday          DateTime?   @db.Date
+  age               Int?
+  gender            String?     @db.VarChar(255)
+  gender_identity   String?     @db.VarChar(255)
+  nationality       String?     @db.VarChar(255)
+  naturalness       String?     @db.VarChar(255)
+  ethnicity         String?     @db.VarChar(255)
+  marital           String?     @db.VarChar(255)
+  place_birth       String?     @db.VarChar(255)
+  phone             String?     @db.VarChar(255)
+  schooling         String?     @db.VarChar(255)
+  profession        String?     @db.VarChar(255)
+  reference_address String?     @db.VarChar(255)
+  lat               Decimal?    @db.Decimal(9, 6)
+  lng               Decimal?    @db.Decimal(9, 6)
+  created_at        DateTime?   @db.Timestamptz(6)
+  updated_at        DateTime?   @db.Timestamptz(6)
+  is_participatory  Boolean?
+  mather            String?     @db.VarChar(255)
+  father            String?     @db.VarChar(255)
+  managements       managements @relation(fields: [management_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "socials_management_id_foreign")
+  sectors           sectors?    @relation(fields: [sector_id], references: [id], onUpdate: NoAction, map: "socials_sector_id_foreign")
+  services          services?   @relation(fields: [service_id], references: [id], onUpdate: NoAction, map: "socials_service_id_foreign")
+  users             users?      @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "socials_user_id_foreign")
+}
+
+model supports {
+  id                                  String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  management_id                       Int
+  user_id                             String      @db.Uuid
+  problem                             String      @db.VarChar(255)
+  description                         String
+  status                              String?     @db.VarChar(255)
+  technician_id                       String?     @db.Uuid
+  started_at                          DateTime?   @db.Timestamptz(6)
+  ended_at                            DateTime?   @db.Timestamptz(6)
+  sorted_out                          Boolean?
+  report                              String?
+  created_at                          DateTime?   @db.Timestamptz(6)
+  updated_at                          DateTime?   @db.Timestamptz(6)
+  obs                                 String?
+  process_at                          DateTime?   @db.Timestamptz(6)
+  managements                         managements @relation(fields: [management_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "supports_management_id_foreign")
+  users_supports_technician_idTousers users?      @relation("supports_technician_idTousers", fields: [technician_id], references: [id], onUpdate: NoAction, map: "supports_technician_id_foreign")
+  users_supports_user_idTousers       users       @relation("supports_user_idTousers", fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "supports_user_id_foreign")
+}
+
+model systems {
+  id           Int            @id @default(autoincrement())
+  name         String         @unique(map: "systems_name_unique") @db.VarChar(255)
+  url          String?        @db.VarChar(255)
+  user_id      String?        @db.Uuid
+  created_at   DateTime?      @db.Timestamptz(6)
+  updated_at   DateTime?      @db.Timestamptz(6)
+  status       Boolean?       @default(true)
+  order_system order_system[]
+  users        users?         @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "systems_user_id_foreign")
+
+  @@index([name], map: "systems_name_index")
+}
+
+model tokens {
+  id         Int       @id @default(autoincrement())
+  user_id    String?   @db.Uuid
+  token      String    @unique(map: "tokens_token_unique") @db.VarChar(255)
+  type       String    @db.VarChar(80)
+  is_revoked Boolean?  @default(false)
+  created_at DateTime? @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  users      users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tokens_user_id_foreign")
+
+  @@index([token], map: "tokens_token_index")
+}
+
+model upajs {
+  id            Int             @id @default(autoincrement())
+  initials      String          @db.VarChar(255)
+  name          String?         @unique(map: "upajs_name_unique") @db.VarChar(255)
+  institution   String?         @db.VarChar(255)
+  address_id    Int?
+  created_at    DateTime?       @db.Timestamptz(6)
+  updated_at    DateTime?       @db.Timestamptz(6)
+  bopms         bopms[]
+  civil_polices civil_polices[]
+  closing_forms closing_forms[]
+  addresses     addresses?      @relation(fields: [address_id], references: [id], onUpdate: NoAction, map: "upajs_address_id_foreign")
+}
+
+model user_classrooms {
+  id           Int        @id @default(autoincrement())
+  classroom_id String     @db.Uuid
+  user_id      String     @db.Uuid
+  progress     Boolean?   @default(false)
+  created_at   DateTime?  @db.Timestamptz(6)
+  updated_at   DateTime?  @db.Timestamptz(6)
+  classrooms   classrooms @relation(fields: [classroom_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "user_classrooms_classroom_id_foreign")
+  users        users      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "user_classrooms_user_id_foreign")
+
+  @@index([classroom_id], map: "user_classrooms_classroom_id_index")
+  @@index([user_id], map: "user_classrooms_user_id_index")
+}
+
+model users {
+  id                                             String                       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id                                        String?                      @db.Uuid
+  first_name                                     String                       @db.VarChar(255)
+  last_name                                      String?                      @db.VarChar(255)
+  document                                       String                       @unique(map: "users_document_unique") @db.VarChar(50)
+  document_secondary                             String?                      @unique(map: "users_document_secondary_unique") @db.VarChar(50)
+  email                                          String                       @unique(map: "users_email_unique") @db.VarChar(255)
+  password                                       String                       @db.VarChar(100)
+  phone                                          String?                      @db.VarChar(50)
+  gender                                         String?                      @db.VarChar(30)
+  birthday                                       DateTime?                    @db.Date
+  avatar                                         String?                      @db.VarChar(255)
+  is_intelligence                                Boolean?                     @default(false)
+  status                                         Boolean?                     @default(true)
+  created_at                                     DateTime?                    @db.Timestamptz(6)
+  updated_at                                     DateTime?                    @db.Timestamptz(6)
+  token                                          String?                      @db.VarChar(255)
+  profile_updated_at                             DateTime?                    @db.Timestamptz(6)
+  rg                                             String?                      @unique(map: "users_rg_unique")
+  allocations_allocations_auth_idTousers         allocations[]                @relation("allocations_auth_idTousers")
+  allocations_allocations_user_idTousers         allocations[]                @relation("allocations_user_idTousers")
+  bdtds_bdtds_adm_idTousers                      bdtds[]                      @relation("bdtds_adm_idTousers")
+  bdtds_bdtds_user_idTousers                     bdtds[]                      @relation("bdtds_user_idTousers")
+  blockings_blockings_auth_idTousers             blockings[]                  @relation("blockings_auth_idTousers")
+  blockings_blockings_user_idTousers             blockings[]                  @relation("blockings_user_idTousers")
+  body_cans                                      body_cans[]
+  bopms                                          bopms[]
+  closing_forms                                  closing_forms[]
+  construction_in_progresses                     construction_in_progresses[]
+  driver_licences_driver_licences_auth_idTousers driver_licences[]            @relation("driver_licences_auth_idTousers")
+  driver_licences_driver_licences_user_idTousers driver_licences[]            @relation("driver_licences_user_idTousers")
+  Renamedextends                                 Renamedextends[]
+  fleets                                         fleets[]
+  fuelings                                       fuelings[]
+  gases                                          gases[]
+  involved_cars                                  involved_cars[]
+  involveds                                      involveds[]
+  managements                                    managements[]
+  orders_orders_operator_idTousers               orders[]                     @relation("orders_operator_idTousers")
+  orders_orders_user_idTousers                   orders[]                     @relation("orders_user_idTousers")
+  participations                                 participations[]
+  people                                         people[]
+  people_occurrences                             people_occurrences[]
+  permission_user                                permission_user[]
+  polls                                          polls[]
+  proximities                                    proximities[]
+  quizzes                                        quizzes[]
+  researcher_supervisions                        researcher_supervisions[]
+  results                                        results[]
+  role_user                                      role_user[]
+  services_services_auth_idTousers               services[]                   @relation("services_auth_idTousers")
+  services_services_missing_idTousers            services[]                   @relation("services_missing_idTousers")
+  services_services_presence_ended_idTousers     services[]                   @relation("services_presence_ended_idTousers")
+  services_services_presence_started_idTousers   services[]                   @relation("services_presence_started_idTousers")
+  services_services_user_idTousers               services[]                   @relation("services_user_idTousers")
+  socials                                        socials[]
+  supports_supports_technician_idTousers         supports[]                   @relation("supports_technician_idTousers")
+  supports_supports_user_idTousers               supports[]                   @relation("supports_user_idTousers")
+  systems                                        systems[]
+  tokens                                         tokens[]
+  user_classrooms                                user_classrooms[]
+  users                                          users?                       @relation("usersTousers", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "users_user_id_foreign")
+  other_users                                    users[]                      @relation("usersTousers")
+  vehicles                                       vehicles[]
+  water_qualities                                water_qualities[]
+
+  @@index([document], map: "users_document_index")
+  @@index([document_secondary], map: "users_document_secondary_index")
+}
+
+model vehicles {
+  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id       String?   @db.Uuid
+  plate         String?   @unique(map: "vehicles_plate_unique") @db.VarChar(20)
+  chassi        String    @unique(map: "vehicles_chassi_unique") @db.VarChar(20)
+  color         String?   @db.VarChar(20)
+  brand         String?   @db.VarChar(50)
+  model         String?   @db.VarChar(50)
+  created_at    DateTime? @db.Timestamptz(6)
+  updated_at    DateTime? @db.Timestamptz(6)
+  description   String?
+  engine_number String?   @db.VarChar(30)
+  orders        orders[]
+  users         users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "vehicles_user_id_foreign")
+
+  @@index([chassi], map: "vehicles_chassi_index")
+  @@index([plate], map: "vehicles_plate_index")
+}
+
+model water_qualities {
+  id                  String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id             String      @db.Uuid
+  management_id       Int
+  action_id           String      @db.Uuid
+  address_id          Int?
+  city                String      @db.VarChar(255)
+  name                String      @db.VarChar(255)
+  gender              String?     @db.VarChar(30)
+  age                 String?     @db.VarChar(255)
+  lived_city          String?     @db.VarChar(255)
+  long_lived_city     String?     @db.VarChar(255)
+  receive_running     String?     @db.VarChar(255)
+  attended_collection String?     @db.VarChar(255)
+  received_water      String?     @db.VarChar(255)
+  lack_water          String?     @db.VarChar(255)
+  water_interruptions String?     @db.VarChar(255)
+  water_pressure      String?     @db.VarChar(255)
+  sewage_return       String?     @db.VarChar(255)
+  bad_smell           String?     @db.VarChar(255)
+  leak_runs_out       String?     @db.VarChar(255)
+  latitude            String?     @db.VarChar(255)
+  longitude           String?     @db.VarChar(255)
+  created_at          DateTime?   @db.Timestamptz(6)
+  updated_at          DateTime?   @db.Timestamptz(6)
+  residence           String?     @db.VarChar(255)
+  ethnicity           String?     @db.VarChar(255)
+  marital             String?     @db.VarChar(255)
+  schooling           String?     @db.VarChar(255)
+  currently           String?     @db.VarChar(255)
+  income              String?     @db.VarChar(255)
+  actions             actions     @relation(fields: [action_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "water_qualities_action_id_foreign")
+  addresses           addresses?  @relation(fields: [address_id], references: [id], onUpdate: NoAction, map: "water_qualities_address_id_foreign")
+  managements         managements @relation(fields: [management_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "water_qualities_management_id_foreign")
+  users               users       @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "water_qualities_user_id_foreign")
+}
