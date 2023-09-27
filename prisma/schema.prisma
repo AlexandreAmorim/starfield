@@ -165,3 +165,23 @@ model Allocation {
 
   @@map("allocations")
 }
+
+model Setting {
+  id                   Int       @id @default(autoincrement())
+  version              String?
+  profile_update_limit DateTime? @default(now())
+  managementsIds       String?
+  cortex_status        Boolean?  @default(true)
+  cortex_token         String?
+  cortex_status_person Boolean?  @default(true)
+  cortex_token_person  String?
+  cetic_status         Boolean?  @default(true)
+  cetic_token          String?
+  sinalid_status       Boolean?  @default(true)
+  sinalid_token        String?
+  sinalid_cookie       String?
+  created_at           DateTime? @default(now())
+  updated_at           DateTime? @default(now())
+
+  @@map("settings")
+}
