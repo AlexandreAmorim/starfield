@@ -9,7 +9,7 @@ export async function refresh(request: FastifyRequest, reply: FastifyReply) {
     },
   })
 
-  const refreshToken = await reply.jwtSign({
+  const refresh_token = await reply.jwtSign({
     sign: {
       sub: request.user.sub,
       expiresIn: '7d',
@@ -17,7 +17,7 @@ export async function refresh(request: FastifyRequest, reply: FastifyReply) {
   })
 
   return reply
-    .setCookie('refreshToken', refreshToken, {
+    .setCookie('refresh_token', refresh_token, {
       path: '/',
       secure: true,
       sameSite: true,

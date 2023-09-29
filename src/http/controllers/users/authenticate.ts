@@ -28,7 +28,7 @@ export async function authenticate(
       },
     })
 
-    const refreshToken = await reply.jwtSign({
+    const refresh_token = await reply.jwtSign({
       sign: {
         sub: user.id,
         expiresIn: '7d',
@@ -38,7 +38,7 @@ export async function authenticate(
     return reply.status(200).send({
       user,
       token,
-      refreshToken,
+      refresh_token,
     })
   } catch (err) {
     if (err instanceof InvalidCredentialsError) {
